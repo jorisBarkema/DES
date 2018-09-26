@@ -12,7 +12,13 @@ namespace DES
     {
         static void Main(string[] args)
         {
-            Console.Write("string:\t");
+            Console.Write("key:\t");
+            string k = Console.ReadLine();
+
+            long key = StringToLongList(k, true)[0];
+
+
+            Console.Write("message:\t");
             string s = Console.ReadLine();
             Console.WriteLine();
 
@@ -22,6 +28,85 @@ namespace DES
             string su = Decrypt(se);
             Console.WriteLine("DES unencrypted:\t" + su);
             Console.ReadLine();
+        }
+
+        static string LongToBitString(long l) => Convert.ToString(l, 2).PadLeft(64, '0');
+        static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
+
+        static void WriteByteArray(byte[] array, string name = "byte[]")
+        {
+            Console.Write(name + ":\t");
+            for (int i = 0; i < array.Length; i++) Console.Write(array[i] + "\t");
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Converts a string in ASCII to a list of longs
+        /// </summary>
+        /// <param name="s">The string to be converted</param>
+        /// <param name="debug">Whether or not debug info will be printed on the console</param>
+        /// <returns>List of longs from the converted string</returns>
+        static List<long> StringToLongList(string s, bool debug = false)
+        {
+            if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
+            byte[] bytes = Encoding.ASCII.GetBytes(s);
+
+            if (debug)
+            {
+                Console.WriteLine("byte form:");
+                WriteByteArray(bytes);
+            }
+
+            byte[] paddedBytes = (bytes.Length % 8 == 0) ? new byte[bytes.Length] : new byte[bytes.Length + 8 - (bytes.Length % 8)];
+            for (int i = 0; i < bytes.Length; i++) paddedBytes[i] = bytes[i];
+
+            if (debug)
+            {
+                Console.WriteLine("padded byte form:");
+                WriteByteArray(paddedBytes);
+            }
+
+            List<long> longs = new List<long>();
+
+            for (int i = 0; i <= paddedBytes.Length - 8; i += 8)
+            {
+                long res = ByteArrayToLong(paddedBytes, i);
+                if (debug)
+                {
+                    Console.WriteLine("long:\t\t" + res);
+                    Console.WriteLine("in bit form:\t" + LongToBitString(res));
+                    Console.WriteLine();
+                }
+                    longs.Add(res);
+            }
+
+            return longs;
+        }
+
+        /// <summary>
+        /// Converts a byte array of length 8 to a long, choosing a sub-array stating from index i
+        /// </summary>
+        /// <param name="b">The full array</param>
+        /// <param name="i">The index to start</param>
+        /// <returns> long converted from the byte array</returns>
+        static long ByteArrayToLong(byte[] b, int i, bool debug = false)
+        {
+            if (b.Length - i < 8) throw new Exception();
+
+            long l = 0;
+
+            for (int t = 0; t < 8; t++)
+            {
+                if (debug) Console.Write("");
+                l += (Int64)b[i + t] << (8 * (8 - t - 1));
+            }
+
+            if (debug)
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+            }
+            return l;
         }
 
         // DES implementation from https://www.codeproject.com/Articles/19538/Encrypt-Decrypt-String-using-DES-in-C
