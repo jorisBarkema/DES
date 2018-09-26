@@ -23,7 +23,7 @@ namespace DES
 
             DES des = new DES(key, StringToLongList(s));
 
-            des.ApplyPermutation(key, des.initialPermutation, true);
+            des.ApplyPermutation(key, des.pl.initialPermutation, true);
 
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);
