@@ -27,13 +27,13 @@ namespace DES
         // DES implementation from https://www.codeproject.com/Articles/19538/Encrypt-Decrypt-String-using-DES-in-C
         static byte[] bytekey = ASCIIEncoding.ASCII.GetBytes("aIfjUejv");
 
-        /// <span class="code-SummaryComment"><summary></span>
+        /// <summary>
         /// Encrypt a string.
-        /// <span class="code-SummaryComment"></summary></span>
-        /// <span class="code-SummaryComment"><param name="originalString">The original string.</param></span>
-        /// <span class="code-SummaryComment"><returns>The encrypted string.</returns></span>
-        /// <span class="code-SummaryComment"><exception cref="ArgumentNullException">This exception will be </span>
-        /// thrown when the original string is null or empty.<span class="code-SummaryComment"></exception></span>
+        /// </summary>
+        /// <param name="originalString">The original string.</param>
+        /// <returns>The encrypted string.</returns>
+        /// <exception cref="ArgumentNullException">This exception will be 
+        /// thrown when the original string is null or empty.</exception>
         public static string Encrypt(string originalString)
         {
             if (String.IsNullOrEmpty(originalString))
@@ -53,13 +53,13 @@ namespace DES
             return Convert.ToBase64String(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
         }
 
-        /// <span class="code-SummaryComment"><summary></span>
+        /// <summary>
         /// Decrypt a crypted string.
-        /// <span class="code-SummaryComment"></summary></span>
-        /// <span class="code-SummaryComment"><param name="cryptedString">The crypted string.</param></span>
-        /// <span class="code-SummaryComment"><returns>The decrypted string.</returns></span>
-        /// <span class="code-SummaryComment"><exception cref="ArgumentNullException">This exception will be thrown </span>
-        /// when the crypted string is null or empty.<span class="code-SummaryComment"></exception></span>
+        /// </summary>
+        /// <param name="cryptedString">The crypted string.</param>
+        /// <returns>The decrypted string.</returns>
+        /// <exception cref="ArgumentNullException">This exception will be thrown 
+        /// when the crypted string is null or empty.</exception>
         public static string Decrypt(string cryptedString)
         {
             if (String.IsNullOrEmpty(cryptedString))
