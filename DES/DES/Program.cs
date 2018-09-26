@@ -22,7 +22,7 @@ namespace DES
             Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
-
+            des.Encrypt();
 
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);

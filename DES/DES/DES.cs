@@ -21,8 +21,6 @@ namespace DES
             this.message = s;
 
             this.pl = new PermutationLibrary();
-
-            GenerateKeys();
             
             //Console.WriteLine("Applying expansion to first message block right half");
             //this.ExpandedRightHalfOfMessage(message[0]);
@@ -31,11 +29,20 @@ namespace DES
             //this.CompressKey(permutatedKey);
         }
 
-        private List<long> Encrypt()
+        public List<long> Encrypt()
         {
+            GenerateKeys(true);
+
             for (int i = 0; i < message.Count; i++)
             {
-                ApplyInitialPermutation(message[i]);
+                long l = ApplyInitialPermutation(message[i], true);
+
+                long exRightHalf = ExpandedRightHalf(Program.GetRightHalf(l));
+
+                for(int t = 0; t < 16; t++)
+                {
+                    long xorresult = exRightHalf ^ keys[t];
+                }
             }
 
             return null;
@@ -44,15 +51,15 @@ namespace DES
         /// <summary>
         /// Apply the initial permutation to a block of the message
         /// </summary>
-        public long ApplyInitialPermutation(long l)
+        public long ApplyInitialPermutation(long l, bool debug = false)
         {
-            return ApplyPermutation(l, pl.initialPermutation, true);
+            return ApplyPermutation(l, pl.initialPermutation, debug);
         }
 
         /// <summary>
         /// Generate the 16 48-bit keys
         /// </summary>
-        public void GenerateKeys()
+        public void GenerateKeys(bool debug = false)
         {
             Console.WriteLine("Applying key permutation to key");
             long permutatedKey = this.ApplyPermutation(fullKey, this.pl.keyPermutation, true);
@@ -69,10 +76,10 @@ namespace DES
                 compressedKey = CompressKey(shiftedKey, false);
                 keys[i] = compressedKey;
 
-                Program.WriteLongAsBits(keys[i], "key number " + i);
+                if (debug) Program.WriteLongAsBits(keys[i], "key number " + i);
             }
 
-            Console.WriteLine();
+            if (debug) Console.WriteLine();
 
         }
 
@@ -119,7 +126,7 @@ namespace DES
             return l;
         }
 
-        public long ExpandedRightHalfOfMessage(long l)
+        public long ExpandedRightHalf(long l)
         {
             long r = Program.GetRightHalf(l);
             return ApplyPermutation(r, pl.expansionPermutation, true);
