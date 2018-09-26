@@ -23,7 +23,6 @@ namespace DES
 
             DES des = new DES(key, StringToLongList(s));
 
-            des.ApplyPermutation(key, des.pl.initialPermutation, true);
 
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);
@@ -35,6 +34,8 @@ namespace DES
 
         public static string LongToBitString(long l) => Convert.ToString(l, 2).PadLeft(64, '0');
         public static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
+        public static long GetRightHalf(long l) => (l << 32);
+        public static long GetLeftHalf(long l) => (l >> 32);
 
         static void WriteByteArray(byte[] array, string name = "byte[]")
         {
@@ -113,7 +114,7 @@ namespace DES
         }
 
         // DES implementation from https://www.codeproject.com/Articles/19538/Encrypt-Decrypt-String-using-DES-in-C
-        static byte[] bytekey = ASCIIEncoding.ASCII.GetBytes("aIfjUejv");
+        static byte[] bytekey = ASCIIEncoding.ASCII.GetBytes("hello123");
 
         /// <summary>
         /// Encrypt a string.
