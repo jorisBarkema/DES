@@ -17,10 +17,13 @@ namespace DES
 
             long key = StringToLongList(k, true)[0];
 
-
             Console.Write("message:\t");
             string s = Console.ReadLine();
             Console.WriteLine();
+
+            DES des = new DES(key, StringToLongList(s));
+
+            des.ApplyPermutation(key, des.initialPermutation, true);
 
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);
@@ -30,8 +33,8 @@ namespace DES
             Console.ReadLine();
         }
 
-        static string LongToBitString(long l) => Convert.ToString(l, 2).PadLeft(64, '0');
-        static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
+        public static string LongToBitString(long l) => Convert.ToString(l, 2).PadLeft(64, '0');
+        public static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
 
         static void WriteByteArray(byte[] array, string name = "byte[]")
         {
