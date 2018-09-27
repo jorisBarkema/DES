@@ -35,7 +35,7 @@ namespace DES
         public static string LongToBitString(long l) => Convert.ToString(l, 2).PadLeft(64, '0');
         public static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
         public static long GetRightHalf(long l) => (l << 32);
-        public static long GetLeftHalf(long l) => (l >> 32);
+        public static long GetLeftHalf(long l) => (l >> 32) << 32;
 
         static void WriteByteArray(byte[] array, string name = "byte[]")
         {

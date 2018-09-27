@@ -21,7 +21,7 @@ namespace DES
             this.message = s;
 
             this.pl = new PermutationLibrary();
-            
+
             //Console.WriteLine("Applying expansion to first message block right half");
             //this.ExpandedRightHalfOfMessage(message[0]);
 
@@ -35,13 +35,23 @@ namespace DES
 
             for (int i = 0; i < message.Count; i++)
             {
+                Console.WriteLine("Applying initial transformation to mesage block");
                 long l = ApplyInitialPermutation(message[i], true);
+                Console.WriteLine();
 
-                long exRightHalf = ExpandedRightHalf(Program.GetRightHalf(l));
+                Console.WriteLine("Applying expansion to message right half");
+                long exRightHalf = ExpandedRightHalf(l);
+                Console.WriteLine();
 
-                for(int t = 0; t < 16; t++)
+                for (int t = 0; t < 16; t++)
                 {
+                    Console.WriteLine("Applying XOR with key " + t + "to expanded right half");
                     long xorresult = exRightHalf ^ keys[t];
+                    Console.WriteLine();
+
+                    long sBoxed = ApplySBoxes(xorresult, true);
+
+                    long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
                 }
             }
 
@@ -67,9 +77,9 @@ namespace DES
             Console.WriteLine();
 
             long shiftedKey = permutatedKey, compressedKey;
-            for(int i = 0; i < 16; i++)
+            for (int i = 0; i < 16; i++)
             {
-                for(int j = 0; j < NumBitsToShiftKey[i]; j++)
+                for (int j = 0; j < NumBitsToShiftKey[i]; j++)
                 {
                     shiftedKey = ShiftKeyHalves(shiftedKey, false);
                 }
@@ -131,7 +141,7 @@ namespace DES
             long r = Program.GetRightHalf(l);
             return ApplyPermutation(r, pl.expansionPermutation, true);
         }
-        
+
         public long ApplyPermutation(long l, Permutation p, bool debug = false)
         {
             long res = 0;
@@ -149,6 +159,46 @@ namespace DES
                 Console.WriteLine();
             }
             return res;
+        }
+
+        public long ApplySBoxes(long l, bool debug = false)
+        {
+            long res = 0;
+
+            if (debug)
+            {
+                Console.WriteLine("Applying S-Boxes to");
+                Program.WriteLongAsBits(l);
+            }
+
+            int t = 0;
+            for (int i = 58; i >= 16; i -= 6)
+            {
+                byte b = ApplySBox(l >> i, t, debug);
+                // Move the 32 bits to the left
+                res |= (long)(b << (i + 2 * t + 2));
+                t++;
+            }
+
+            if (debug)
+            {
+                Console.WriteLine("APplied S-Boxes resulted in");
+                Program.WriteLongAsBits(res);
+            }
+            return res;
+        }
+
+        public byte ApplySBox(long l, int s, bool debug = false)
+        {
+            // look at the rightmost and leftmost bits
+            // do not move the leftmost bit 5 positions, but 4 so it is in the second spot.
+            int row = (((int)l & 32) >> 4) + ((int)l & 1);
+            if (debug) Console.WriteLine("row:\t" + row);
+            // Move the 4 center bits on to the right, and despose of the leftmost one.
+            int col = ((int)l >> 1) & 15;
+            if (debug) Console.WriteLine("col:\t" + col);
+
+            return pl.SBoxes[s].permutation[row * 16 + col];
         }
     }
 }
