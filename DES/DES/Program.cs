@@ -15,14 +15,23 @@ namespace DES
             Console.Write("key:\t");
             string k = Console.ReadLine();
 
-            long key = StringToLongList(k, true)[0];
+            long key = StringToLongList(k)[0];
 
             Console.Write("message:\t");
             string s = Console.ReadLine();
             Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
-            des.Encrypt();
+            List<long> res = des.Encrypt();
+
+            byte[] resultArray = LongListToByteList(res, true).ToArray();
+            ASCIIEncoding encoding = new ASCIIEncoding();
+            string encryptedMessage = encoding.GetString(resultArray);
+
+            encryptedMessage = Convert.ToBase64String(resultArray);
+            Console.WriteLine();
+            Console.WriteLine("encrypted message:\t" + encryptedMessage);
+            Console.WriteLine();
 
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);
@@ -54,6 +63,7 @@ namespace DES
         {
             if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
             byte[] bytes = Encoding.ASCII.GetBytes(s);
+            bytes = Convert.FromBase64String(s);
 
             if (debug)
             {
@@ -92,6 +102,7 @@ namespace DES
         /// </summary>
         /// <param name="b">The full array</param>
         /// <param name="i">The index to start</param>
+        /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns> long converted from the byte array</returns>
         static long ByteArrayToLong(byte[] b, int i, bool debug = false)
         {
@@ -111,6 +122,38 @@ namespace DES
                 Console.WriteLine();
             }
             return l;
+        }
+
+        /// <summary>
+        /// Converts a list of longs to a byte list
+        /// </summary>
+        /// <param name="ll">The list of longs to be converted</param>
+        /// <param name="debug">Whether or not debug info will be printed on the console</param>
+        /// <returns>The converted byte list</returns>
+        static List<byte> LongListToByteList(List<long> ll, bool debug = false)
+        {
+            if (debug)
+            {
+                Console.WriteLine("Longs in the list:");
+                foreach (long l in ll) WriteLongAsBits(l);
+            }
+            List<byte> res = new List<byte>();
+
+            for(int i = 0; i < ll.Count; i++)
+            {
+                for(int t = 7; t >= 0; t--)
+                {
+                    byte b = (byte)(ll[i] >> (8 * t));
+                    res.Add(b);
+                }
+            }
+
+            if (debug)
+            {
+                WriteByteArray(res.ToArray(), "resulting byte list");
+            }
+
+            return res;
         }
 
         // DES implementation from https://www.codeproject.com/Articles/19538/Encrypt-Decrypt-String-using-DES-in-C

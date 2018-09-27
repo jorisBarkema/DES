@@ -33,6 +33,8 @@ namespace DES
         {
             GenerateKeys(true);
 
+            List<long> result = new List<long>();
+
             // for all message blocks
             for (int i = 0; i < message.Count; i++)
             {
@@ -80,9 +82,11 @@ namespace DES
                 }
 
                 l = ApplyPermutation(l, pl.finalPermutation, true);
+
+                result.Add(l);
             }
 
-            return null;
+            return result;
         }
 
         /// <summary>
