@@ -33,26 +33,53 @@ namespace DES
         {
             GenerateKeys(true);
 
+            // for all message blocks
             for (int i = 0; i < message.Count; i++)
             {
                 Console.WriteLine("Applying initial transformation to mesage block");
-                long l = ApplyInitialPermutation(message[i], true);
+                long l = ApplyPermutation(message[i], pl.initialPermutation, true);
                 Console.WriteLine();
 
-                Console.WriteLine("Applying expansion to message right half");
-                long exRightHalf = ExpandedRightHalf(l);
-                Console.WriteLine();
-
+                // 16 rounds of encryption
                 for (int t = 0; t < 16; t++)
                 {
+                    Console.WriteLine("Left half:");
+                    long left = Program.GetLeftHalf(l);
+                    Program.WriteLongAsBits(left);
+
+                    Console.WriteLine("Right half:");
+                    long right = Program.GetRightHalf(l);
+                    Program.WriteLongAsBits(right);
+
+                    Console.WriteLine("New left half:");
+                    long newLeft = right;
+                    Program.WriteLongAsBits(newLeft);
+
+                    Console.WriteLine("Applying expansion to message right half");
+                    long exRightHalf = ExpandedRightHalf(l);
+                    Console.WriteLine();
+
                     Console.WriteLine("Applying XOR with key " + t + "to expanded right half");
                     long xorresult = exRightHalf ^ keys[t];
                     Console.WriteLine();
 
                     long sBoxed = ApplySBoxes(xorresult, true);
 
+                    Console.WriteLine();
+                    Console.WriteLine("Applying P-Box");
                     long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
+                    Console.WriteLine();
+                    
+                    Console.WriteLine("New right half:");
+                    long newRight = left ^ pBoxed;
+                    Program.WriteLongAsBits(newRight);
+
+                    Console.WriteLine("long to be worked in the next round:");
+                    l = newLeft + (newRight >> 32);
+                    Program.WriteLongAsBits(l);
                 }
+
+                l = ApplyPermutation(l, pl.finalPermutation, true);
             }
 
             return null;
@@ -150,7 +177,8 @@ namespace DES
 
             for (int i = 0; i < p.length; i++)
             {
-                res |= ((l >> (63 - p.permutation[i])) & 1) << (63 - i);
+                // the +1 is because Thsi works 0-based, while the permutations are 1-based
+                res |= ((l >> (63 - p.permutation[i] + 1)) & 1) << (63 - i);
             }
 
             if (debug)
