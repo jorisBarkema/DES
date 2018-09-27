@@ -15,7 +15,7 @@ namespace DES
             Console.Write("key:\t");
             string k = Console.ReadLine();
 
-            long key = StringToLongList(k)[0];
+            long key = StringToLongList(k, true)[0];
 
             Console.Write("message:\t");
             string s = Console.ReadLine();
@@ -25,12 +25,21 @@ namespace DES
             List<long> res = des.Encrypt();
 
             byte[] resultArray = LongListToByteList(res, true).ToArray();
-            ASCIIEncoding encoding = new ASCIIEncoding();
-            string encryptedMessage = encoding.GetString(resultArray);
+            //ASCIIEncoding encoding = new ASCIIEncoding();
+            //string encryptedMessage = encoding.GetString(resultArray);
 
-            encryptedMessage = Convert.ToBase64String(resultArray);
+            string encryptedMessage = Convert.ToBase64String(resultArray);
             Console.WriteLine();
-            Console.WriteLine("encrypted message:\t" + encryptedMessage);
+            Console.WriteLine("Original key:\t\t\t" + k);
+            Console.WriteLine("original key in bytes: ");
+           // WriteByteArray(Convert.FromBase64String(k));
+            Console.WriteLine("Original string:\t\t" + s);
+            Console.WriteLine("original string in bytes: ");
+            //WriteByteArray(Convert.FromBase64String(s));
+
+            Console.WriteLine("encrypted message in bytes:");
+            WriteByteArray(resultArray);
+            Console.WriteLine("encrypted message:\t\t" + encryptedMessage);
             Console.WriteLine();
 
             Console.WriteLine("Original string:\t" + s);
@@ -54,7 +63,7 @@ namespace DES
         }
 
         /// <summary>
-        /// Converts a string in ASCII to a list of longs
+        /// Converts a string to a list of longs
         /// </summary>
         /// <param name="s">The string to be converted</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
@@ -63,7 +72,7 @@ namespace DES
         {
             if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
             byte[] bytes = Encoding.ASCII.GetBytes(s);
-            bytes = Convert.FromBase64String(s);
+            //bytes = Convert.FromBase64String(s);
 
             if (debug)
             {
