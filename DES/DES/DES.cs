@@ -175,14 +175,14 @@ namespace DES
             for (int i = 58; i >= 16; i -= 6)
             {
                 byte b = ApplySBox(l >> i, t, debug);
-                // Move the 32 bits to the left
-                res |= (long)(b << (i + 2 * t + 2));
+                // Move the 32-bit result to the left
+                res |= ((long)b << (i + 2 * t + 2));
                 t++;
             }
 
             if (debug)
             {
-                Console.WriteLine("APplied S-Boxes resulted in");
+                Console.WriteLine("Applied S-Boxes resulted in");
                 Program.WriteLongAsBits(res);
             }
             return res;
