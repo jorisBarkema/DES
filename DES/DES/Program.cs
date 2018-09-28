@@ -22,13 +22,18 @@ namespace DES
             Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
+            
             List<long> res = des.Encrypt();
+            List<long> deres = des.Decrypt(res);
 
             byte[] resultArray = LongListToByteList(res, true).ToArray();
+            byte[] deresultArray = LongListToByteList(deres, true).ToArray();
             //ASCIIEncoding encoding = new ASCIIEncoding();
             //string encryptedMessage = encoding.GetString(resultArray);
 
             string encryptedMessage = Convert.ToBase64String(resultArray);
+            string deencryptedMessage = Convert.ToBase64String(deresultArray);
+
             Console.WriteLine();
             Console.WriteLine("Original key:\t\t\t" + k);
             Console.WriteLine("original key in bytes: ");
@@ -42,11 +47,17 @@ namespace DES
             Console.WriteLine("encrypted message:\t\t" + encryptedMessage);
             Console.WriteLine();
 
+            Console.WriteLine("de-encrypted message in bytes:");
+            WriteByteArray(deresultArray);
+            Console.WriteLine("de-encrypted message:\t\t" + deencryptedMessage);
+            Console.WriteLine();
+
             Console.WriteLine("Original string:\t" + s);
             string se = Encrypt(s);
             Console.WriteLine("DES encrypted:\t\t" + se);
             string su = Decrypt(se);
             Console.WriteLine("DES unencrypted:\t" + su);
+            
             Console.ReadLine();
         }
 
@@ -54,6 +65,7 @@ namespace DES
         public static void WriteLongAsBits(long l, string name = "long") => Console.WriteLine(name + ":\t" + LongToBitString(l) + "\t");
         public static long GetRightHalf(long l) => (l << 32);
         public static long GetLeftHalf(long l) => (l >> 32) << 32;
+        public static long SwapHalves(long l) => (Program.GetLeftHalf(l) >> 32) | Program.GetRightHalf(l);
 
         static void WriteByteArray(byte[] array, string name = "byte[]")
         {

@@ -13,7 +13,9 @@ namespace DES
         private long fullKey;
         private long[] encryptionKeys = new long[16];
         private long[] decryptionKeys = new long[16];
-        private byte[] NumBitsToShiftKey = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
+        private byte[] NumBitsToShiftKeyLeft     = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
+        private byte[] NumBitsToShiftKeyRight = { 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
+
         public PermutationLibrary pl;
 
         public DES(long k, List<long> s)
@@ -23,8 +25,53 @@ namespace DES
 
             this.pl = new PermutationLibrary();
 
-            GenerateEncryptionKeys(true);
-            GenerateDecryptionKeys(true);
+            GenerateKeys(encryptionKeys, "left", true);
+            GenerateKeys(decryptionKeys, "right", true);
+        }
+
+        private long Feistel(long message, long[] keys)
+        {
+            Console.WriteLine("Applying initial transformation to mesage block");
+            long l = ApplyPermutation(message, pl.initialPermutation, true);
+            Console.WriteLine();
+
+            // 16 rounds of encryption
+            for (int t = 0; t < 16; t++)
+            {
+                long left = Program.GetLeftHalf(l);
+                long right = Program.GetRightHalf(l);
+                long newLeft = right;
+                long newRight = left ^ F(right, keys[t]);
+
+                l = newLeft | (newRight >> 32);
+            }
+
+            l = ApplyPermutation(l, pl.finalPermutation, true);
+
+            return l;
+        }
+
+        /// <summary>
+        /// DES F function
+        /// 1. Expand right half to 48 bits
+        /// 2. XOR with key
+        /// 3. Apply S-Boxes
+        /// 4. Apply P-Box
+        /// </summary>
+        /// <param name="righthalf">32-btis right half</param>
+        /// <param name="key">48-bits key</param>
+        /// <returns></returns>
+        private long F(long righthalf, long key)
+        {
+            long exRightHalf = ExpandedRightHalf(righthalf);
+
+            long xorresult = exRightHalf ^ key;
+
+            long sBoxed = ApplySBoxes(xorresult, true);
+            
+            long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
+
+            return pBoxed;
         }
 
         public List<long> Encrypt()
@@ -32,55 +79,7 @@ namespace DES
             List<long> result = new List<long>();
 
             // for all message blocks
-            for (int i = 0; i < message.Count; i++)
-            {
-                Console.WriteLine("Applying initial transformation to mesage block");
-                long l = ApplyPermutation(message[i], pl.initialPermutation, true);
-                Console.WriteLine();
-
-                // 16 rounds of encryption
-                for (int t = 0; t < 16; t++)
-                {
-                    Console.WriteLine("Left half:");
-                    long left = Program.GetLeftHalf(l);
-                    Program.WriteLongAsBits(left);
-
-                    Console.WriteLine("Right half:");
-                    long right = Program.GetRightHalf(l);
-                    Program.WriteLongAsBits(right);
-
-                    Console.WriteLine("New left half:");
-                    long newLeft = right;
-                    Program.WriteLongAsBits(newLeft);
-
-                    Console.WriteLine("Applying expansion to message right half");
-                    long exRightHalf = ExpandedRightHalf(l);
-                    Console.WriteLine();
-
-                    Console.WriteLine("Applying XOR with key " + t + "to expanded right half");
-                    long xorresult = exRightHalf ^ encryptionKeys[t];
-                    Console.WriteLine();
-
-                    long sBoxed = ApplySBoxes(xorresult, true);
-
-                    Console.WriteLine();
-                    Console.WriteLine("Applying P-Box");
-                    long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
-                    Console.WriteLine();
-                    
-                    Console.WriteLine("New right half:");
-                    long newRight = left ^ pBoxed;
-                    Program.WriteLongAsBits(newRight);
-
-                    Console.WriteLine("long to be worked in the next round:");
-                    l = newLeft + (newRight >> 32);
-                    Program.WriteLongAsBits(l);
-                }
-
-                l = ApplyPermutation(l, pl.finalPermutation, true);
-
-                result.Add(l);
-            }
+            for (int i = 0; i < message.Count; i++) result.Add(Feistel(message[i], encryptionKeys));
 
             return result;
         }
@@ -92,58 +91,13 @@ namespace DES
             // for all message blocks
             for (int i = 0; i < ll.Count; i++)
             {
-                Console.WriteLine("Applying initial transformation to mesage block");
-                long l = ApplyPermutation(ll[i], pl.initialPermutation, true);
-                Console.WriteLine();
-
-                // 16 rounds of encryption
-                for (int t = 0; t < 16; t++)
-                {
-                    Console.WriteLine("Left half:");
-                    long left = Program.GetLeftHalf(l);
-                    Program.WriteLongAsBits(left);
-
-                    Console.WriteLine("Right half:");
-                    long right = Program.GetRightHalf(l);
-                    Program.WriteLongAsBits(right);
-
-                    Console.WriteLine("New left half:");
-                    long newLeft = right;
-                    Program.WriteLongAsBits(newLeft);
-
-                    Console.WriteLine("Applying expansion to message right half");
-                    long exRightHalf = ExpandedRightHalf(l);
-                    Console.WriteLine();
-
-                    // 15 - t instead of t when decrypting ???? maybe no not 100% sure
-                    Console.WriteLine("Applying XOR with key " + t + "to expanded right half");
-                    long xorresult = exRightHalf ^ decryptionKeys[15 - t];
-                    Console.WriteLine();
-
-                    long sBoxed = ApplySBoxes(xorresult, true);
-
-                    Console.WriteLine();
-                    Console.WriteLine("Applying P-Box");
-                    long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
-                    Console.WriteLine();
-
-                    Console.WriteLine("New right half:");
-                    long newRight = left ^ pBoxed;
-                    Program.WriteLongAsBits(newRight);
-
-                    Console.WriteLine("long to be worked in the next round:");
-                    l = newLeft + (newRight >> 32);
-                    Program.WriteLongAsBits(l);
-                }
-
-                l = ApplyPermutation(l, pl.finalPermutation, true);
-
-                result.Add(l);
+                //long swapped = Program.SwapHalves(ll[i]);
+                result.Add(Feistel(ll[i], decryptionKeys));
             }
 
             return result;
         }
-
+        
         /// <summary>
         /// Apply the initial permutation to a block of the message
         /// </summary>
@@ -153,30 +107,40 @@ namespace DES
         }
 
         /// <summary>
-        /// Generate the 16 48-bit encryption keys
+        /// 1. Generate 56-bit subkey.
+        /// 2. Shift the key a certain amount of steps depending on the round.
+        /// 3. Compress the key to 48 bits.
         /// </summary>
-        public void GenerateEncryptionKeys(bool debug = false)
+        /// <param name="shiftDirection"> The direction to shift the keys in, "left" for encryption and "right" for decryption</param>
+        public void GenerateKeys(long[] keys, string shiftDirection, bool debug = false)
         {
-            Console.WriteLine("Applying key permutation to key");
-            long permutatedKey = this.ApplyPermutation(fullKey, this.pl.keyPermutation, true);
-
-            Console.WriteLine();
-
-            long shiftedKey = permutatedKey, compressedKey;
+            long key56 = this.ApplyPermutation(fullKey, this.pl.keyPermutation, true);
+            
+            long shiftedKey = key56, key48;
             for (int i = 0; i < 16; i++)
             {
-                for (int j = 0; j < NumBitsToShiftKey[i]; j++)
+                if (shiftDirection == "left")
                 {
-                    shiftedKey = ShiftKeyHalves(shiftedKey, false);
+                    for (int j = 0; j < NumBitsToShiftKeyLeft[i]; j++)
+                    {
+                        shiftedKey = ShiftKeyHalvesLeft(shiftedKey, false);
+                    }
                 }
-                compressedKey = CompressKey(shiftedKey, false);
-                encryptionKeys[i] = compressedKey;
 
-                if (debug) Program.WriteLongAsBits(encryptionKeys[i], "key number " + i);
+                else if (shiftDirection == "right")
+                {
+                    for (int j = 0; j < NumBitsToShiftKeyRight[i]; j++)
+                    {
+                        shiftedKey = ShiftKeyHalvesRight(shiftedKey, false);
+                    }
+                }
+                
+                key48 = CompressKey(shiftedKey, false);
+                keys[i] = key48;
+
+                if (debug) Program.WriteLongAsBits(keys[i], "key number " + i);
             }
-
             if (debug) Console.WriteLine();
-
         }
 
         /// <summary>
@@ -184,22 +148,23 @@ namespace DES
         /// </summary>
         public void GenerateDecryptionKeys(bool debug = false)
         {
-            Console.WriteLine("Applying key permutation to key");
+            if (debug) Console.WriteLine("Applying key permutation to key");
             long permutatedKey = this.ApplyPermutation(fullKey, this.pl.keyPermutation, true);
 
-            Console.WriteLine();
+            if (debug) Console.WriteLine();
 
             long shiftedKey = permutatedKey, compressedKey;
             for (int i = 0; i < 16; i++)
             {
-                for (int j = 0; j < NumBitsToShiftKey[i]; j++)
+                for (int j = 0; j < NumBitsToShiftKeyRight[i]; j++)
                 {
-                    shiftedKey = ShiftKeyHalves(shiftedKey, false);
+                    shiftedKey = ShiftKeyHalvesLeft(shiftedKey, false);
                 }
                 compressedKey = CompressKey(shiftedKey, false);
-                encryptionKeys[i] = compressedKey;
+                // add in reverse order, so we can use them in normal order
+                encryptionKeys[15 - i] = compressedKey;
 
-                if (debug) Program.WriteLongAsBits(encryptionKeys[i], "key number " + i);
+                if (debug) Program.WriteLongAsBits(encryptionKeys[15 - i], "key number " + (15 - i));
             }
 
             if (debug) Console.WriteLine();
@@ -213,12 +178,12 @@ namespace DES
         public long CompressKey(long l, bool debug = false) => ApplyPermutation(l, pl.compressionPermutation, debug);
 
         /// <summary>
-        /// Shift the 2 halves of the 56-bit key by 1 bit
+        /// Shift the 2 halves of the 56-bit key by 1 bit to the left
         /// </summary>
         /// <param name="l"> The key to be shifted</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns> Shifted key</returns>
-        public long ShiftKeyHalves(long l, bool debug = false)
+        public long ShiftKeyHalvesLeft(long l, bool debug = false)
         {
             if (debug) Program.WriteLongAsBits(l, "original key\t");
             bool leftHead, rightHead;
@@ -243,6 +208,36 @@ namespace DES
             // Place the head values on the tail
             if (leftHead) l |= (long)1 << 36;
             if (rightHead) l |= (long)1 << 8;
+
+            if (debug) Program.WriteLongAsBits(l, "shifted key\t");
+            return l;
+        }
+
+        /// <summary>
+        /// Shift the 2 halves of the 56-bit key by 1 bit to the right
+        /// </summary>
+        /// <param name="l"> The key to be shifted</param>
+        /// <param name="debug">Whether or not debug info will be printed on the console</param>
+        /// <returns> Shifted key</returns>
+        public long ShiftKeyHalvesRight(long l, bool debug = false)
+        {
+            if (debug) Program.WriteLongAsBits(l, "original key\t");
+           
+            // Shift the key 1 bit to the right
+            l = l >> 1;
+
+            // the most left tail is definintely 0, so we can simply or it with the bit that is supposed to loop around
+            // which is now on the head of the right half
+            l |= ((l >> 35) & 1) << 63;
+
+            // now we need to set the head of the right half to 0 so we can do the same
+            // Since we cannot set it to 0 directly, we flip all the bits, then set them to 1 with bitwise or operator, then flip again
+            l = ~l;
+            l |= ((long)1 << 35);
+            l = ~l;
+
+            // Now we place the bit that is supposed to loop around on the head.
+            l |= ((l >> 7) & 1) << 35;
 
             if (debug) Program.WriteLongAsBits(l, "shifted key\t");
             return l;
