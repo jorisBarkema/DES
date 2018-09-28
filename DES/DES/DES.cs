@@ -20,7 +20,13 @@ namespace DES
 
         public DES(long k, List<long> s)
         {
-            this.fullKey = k;
+            // this.fullKey = k;
+
+            //0001001 0011010 0101011 0111100 1001101 1011110 1101111 1111000
+            // with 0 on every 8th digit
+            //000100100011010001010110011110001001101010111100110111101111000
+            // binary to long results in 
+            this.fullKey = 655884233731895200;
             this.message = s;
 
             this.pl = new PermutationLibrary();
