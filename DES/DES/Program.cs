@@ -15,7 +15,7 @@ namespace DES
             Console.Write("key:\t");
             string k = Console.ReadLine();
 
-            long key = StringToLongList(k, true)[0];
+            long key = StringToLongList(k)[0];
 
             Console.Write("message:\t");
             string s = Console.ReadLine();
