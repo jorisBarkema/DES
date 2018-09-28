@@ -13,7 +13,7 @@ namespace DES
         private long fullKey;
         private long[] encryptionKeys = new long[16];
         private long[] decryptionKeys = new long[16];
-        private byte[] NumBitsToShiftKeyLeft     = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
+        private byte[] NumBitsToShiftKeyLeft = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
         private byte[] NumBitsToShiftKeyRight = { 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
 
         public PermutationLibrary pl;
@@ -63,16 +63,30 @@ namespace DES
                 long newLeft = right;
 
                 Console.WriteLine("Round: " + t);
-                
+
                 long newRight = left ^ F(right, keys[t]);
 
                 Console.WriteLine("L" + (t + 2) + " = R" + (t + 1) + " = \t" + Program.LongToBitString(newRight));
 
-                l = newLeft + (newRight >> 32);
+                // bitshifting to the right fills the value with zeroes,
+                // this is not what we want; we only want the rightmost 32 bits.
+                // to clear this, bitwise & with the rightmost 32 bits, which happens to be the amount of bits a uint uses.
+                l = newLeft | ((newRight >> 32) & (long)uint.MaxValue);
 
+                /*
+                Console.WriteLine();
+                Console.WriteLine("new left: \t" + Program.LongToBitString(newLeft));
+                Console.WriteLine("new right: \t" + Program.LongToBitString(newRight));
+                Console.WriteLine("nr >> 32: \t" + Program.LongToBitString(((newRight >> 32) & (long)uint.MaxValue)));
+                Console.WriteLine("temp result: \t" + Program.LongToBitString(l));
+                Console.WriteLine();
+                */
             }
 
             l = ApplyPermutation(l, pl.finalPermutation);
+
+            Console.WriteLine();
+            Console.WriteLine("Feistel result: " + Program.LongToBitString(l));
 
             return l;
         }
@@ -112,7 +126,20 @@ namespace DES
             List<long> result = new List<long>();
 
             // for all message blocks
-            for (int i = 0; i < message.Count; i++) result.Add(Feistel(message[i], encryptionKeys));
+            for (int i = 0; i < message.Count; i++)
+            {
+                long feistelValue = Feistel(message[i], encryptionKeys);
+                long finalValue = ApplyPermutation(feistelValue, pl.finalPermutation);
+                Console.WriteLine("final result: \t" + Program.LongToBitString(finalValue));
+                result.Add(finalValue);
+            }
+
+            Console.Write("in hex: \t");
+            List<byte> b = Program.LongListToByteList(result);
+            for (int i = 0; i < b.Count; i++)
+            {
+                Console.Write(b[i].ToString("X"));
+            }
 
             return result;
         }
@@ -130,7 +157,7 @@ namespace DES
 
             return result;
         }
-        
+
         /// <summary>
         /// Apply the initial permutation to a block of the message
         /// </summary>
@@ -148,7 +175,7 @@ namespace DES
         public void GenerateKeys(long[] keys, string shiftDirection, bool debug = false)
         {
             long key56 = this.ApplyPermutation(fullKey, this.pl.keyPermutation);
-            
+
             long shiftedKey = key56, key48;
             for (int i = 0; i < 16; i++)
             {
@@ -167,7 +194,7 @@ namespace DES
                         shiftedKey = ShiftKeyHalvesRight(shiftedKey, false);
                     }
                 }
-                
+
                 key48 = CompressKey(shiftedKey, false);
                 keys[i] = key48;
 
@@ -255,13 +282,13 @@ namespace DES
         public long ShiftKeyHalvesRight(long l, bool debug = false)
         {
             if (debug) Program.WriteLongAsBits(l, "original key\t");
-           
+
             // Shift the key 1 bit to the right
             l = l >> 1;
 
-            // the most left tail is definintely 0, so we can simply or it with the bit that is supposed to loop around
+            // the most left head is definintely 1, so we can simply 'and' it with the bit that is supposed to loop around
             // which is now on the head of the right half
-            l |= ((l >> 35) & 1) << 63;
+            l &= ((l >> 35) & 1) << 63;
 
             // now we need to set the head of the right half to 0 so we can do the same
             // Since we cannot set it to 0 directly, we flip all the bits, then set them to 1 with bitwise or operator, then flip again

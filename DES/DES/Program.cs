@@ -119,7 +119,7 @@ namespace DES
         /// <param name="ll">The list of longs to be converted</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns>The converted byte list</returns>
-        static List<byte> LongListToByteList(List<long> ll, bool debug = false)
+        public static List<byte> LongListToByteList(List<long> ll, bool debug = false)
         {
             if (debug)
             {
