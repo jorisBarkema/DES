@@ -12,20 +12,35 @@ namespace DES
     {
         static void Main(string[] args)
         {
-            //Console.Write("key:\t");
+            //Console.Write("key:\t\t");
             //string k = Console.ReadLine();
-            string k = "0";
-            long key = StringToLongList(k)[0];
+            //long key = StringToLongList(k)[0];
 
             //Console.Write("message:\t");
             //string s = Console.ReadLine();
+            
+            Console.WriteLine();
+
+
+
+            string k = "0";
+            long key = StringToLongList(k)[0];
+
             string s = "0";
-            //Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
-            
+
+            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323123172222922231, true)));
+            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323111111111111231, true)));
+            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2312309882222922231, true)));
+            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323098765657922231, true)));
+            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323999999999999231, true)));
+            //Console.ReadLine();
+
             List<long> res = des.Encrypt();
-            
+
+            List<long> dec = des.Decrypt(res);
+
             Console.ReadLine();
         }
 
