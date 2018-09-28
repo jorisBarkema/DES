@@ -32,7 +32,7 @@ namespace DES
             this.pl = new PermutationLibrary();
 
             GenerateKeys(encryptionKeys, "left", true);
-            GenerateKeys(decryptionKeys, "right", true);
+            //GenerateKeys(decryptionKeys, "right", true);
         }
 
         private long Feistel(long message, long[] keys)
