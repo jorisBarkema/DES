@@ -15,7 +15,7 @@ namespace DES
             Console.Write("key:\t");
             string k = Console.ReadLine();
 
-            long key = StringToLongList(k, true)[0];
+            long key = StringToLongList(k)[0];
 
             Console.Write("message:\t");
             string s = Console.ReadLine();
@@ -23,40 +23,7 @@ namespace DES
 
             DES des = new DES(key, StringToLongList(s));
             
-            List<long> res = des.Encrypt();
-            List<long> deres = des.Decrypt(res);
-
-            byte[] resultArray = LongListToByteList(res, true).ToArray();
-            byte[] deresultArray = LongListToByteList(deres, true).ToArray();
-            //ASCIIEncoding encoding = new ASCIIEncoding();
-            //string encryptedMessage = encoding.GetString(resultArray);
-
-            string encryptedMessage = Convert.ToBase64String(resultArray);
-            string deencryptedMessage = Convert.ToBase64String(deresultArray);
-
-            Console.WriteLine();
-            Console.WriteLine("Original key:\t\t\t" + k);
-            Console.WriteLine("original key in bytes: ");
-           // WriteByteArray(Convert.FromBase64String(k));
-            Console.WriteLine("Original string:\t\t" + s);
-            Console.WriteLine("original string in bytes: ");
-            //WriteByteArray(Convert.FromBase64String(s));
-
-            Console.WriteLine("encrypted message in bytes:");
-            WriteByteArray(resultArray);
-            Console.WriteLine("encrypted message:\t\t" + encryptedMessage);
-            Console.WriteLine();
-
-            Console.WriteLine("de-encrypted message in bytes:");
-            WriteByteArray(deresultArray);
-            Console.WriteLine("de-encrypted message:\t\t" + deencryptedMessage);
-            Console.WriteLine();
-
-            Console.WriteLine("Original string:\t" + s);
-            string se = Encrypt(s);
-            Console.WriteLine("DES encrypted:\t\t" + se);
-            string su = Decrypt(se);
-            Console.WriteLine("DES unencrypted:\t" + su);
+            //List<long> res = des.Encrypt();
             
             Console.ReadLine();
         }
