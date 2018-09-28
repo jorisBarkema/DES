@@ -83,9 +83,15 @@ namespace DES
                 */
             }
 
+            Console.WriteLine();
+            Console.WriteLine("before fin p: \t" + Program.LongToBitString(l));
+
+            long r = Program.GetRightHalf(l);
+            l = l >> 32;
+            l |= r;
+            Console.WriteLine("r and l shift: \t" + Program.LongToBitString(l));
             l = ApplyPermutation(l, pl.finalPermutation);
 
-            Console.WriteLine();
             Console.WriteLine("Feistel result: " + Program.LongToBitString(l));
 
             return l;
@@ -129,16 +135,16 @@ namespace DES
             for (int i = 0; i < message.Count; i++)
             {
                 long feistelValue = Feistel(message[i], encryptionKeys);
-                long finalValue = ApplyPermutation(feistelValue, pl.finalPermutation);
-                Console.WriteLine("final result: \t" + Program.LongToBitString(finalValue));
-                result.Add(finalValue);
+                
+                result.Add(feistelValue);
             }
 
+            Console.WriteLine();
             Console.Write("in hex: \t");
             List<byte> b = Program.LongListToByteList(result);
             for (int i = 0; i < b.Count; i++)
             {
-                Console.Write(b[i].ToString("X"));
+                Console.Write(b[i].ToString("X").PadLeft(2, '0'));
             }
 
             return result;
