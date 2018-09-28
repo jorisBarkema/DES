@@ -22,23 +22,29 @@ namespace DES
         {
             // this.fullKey = k;
 
+            // for now using example key from Stinson
             //0001001 0011010 0101011 0111100 1001101 1011110 1101111 1111000
             // with 0 on every 8th digit
             //0001001000110100010101100111100010011010101111001101111011110000
             // binary to long results in 
             this.fullKey = Convert.ToInt64("0001001000110100010101100111100010011010101111001101111011110000", 2);
-            this.message = s;
 
+
+            // for now using test message from Stinson
+            //this.message = s;
+
+            this.message = new List<long>();
+            this.message.Add(Convert.ToInt64("0123456789ABCDEF", 16));
             this.pl = new PermutationLibrary();
 
-            GenerateKeys(encryptionKeys, "left", true);
+            GenerateKeys(encryptionKeys, "left");
             //GenerateKeys(decryptionKeys, "right", true);
         }
 
         private long Feistel(long message, long[] keys)
         {
             Console.WriteLine("Applying initial transformation to mesage block");
-            long l = ApplyPermutation(message, pl.initialPermutation, true);
+            long l = ApplyPermutation(message, pl.initialPermutation);
             Console.WriteLine();
 
             // 16 rounds of encryption
@@ -52,7 +58,7 @@ namespace DES
                 l = newLeft | (newRight >> 32);
             }
 
-            l = ApplyPermutation(l, pl.finalPermutation, true);
+            l = ApplyPermutation(l, pl.finalPermutation);
 
             return l;
         }

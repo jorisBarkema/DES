@@ -12,18 +12,19 @@ namespace DES
     {
         static void Main(string[] args)
         {
-            Console.Write("key:\t");
-            string k = Console.ReadLine();
-
+            //Console.Write("key:\t");
+            //string k = Console.ReadLine();
+            string k = "";
             long key = StringToLongList(k)[0];
 
-            Console.Write("message:\t");
-            string s = Console.ReadLine();
-            Console.WriteLine();
+            //Console.Write("message:\t");
+            //string s = Console.ReadLine();
+            string s = "";
+            //Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
             
-            //List<long> res = des.Encrypt();
+            List<long> res = des.Encrypt();
             
             Console.ReadLine();
         }
