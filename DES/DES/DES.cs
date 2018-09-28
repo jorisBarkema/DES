@@ -38,13 +38,21 @@ namespace DES
             this.pl = new PermutationLibrary();
 
             GenerateKeys(encryptionKeys, "left");
+
+            Program.WriteLongAsBits(this.message[0]);
+
             //GenerateKeys(decryptionKeys, "right", true);
         }
 
         private long Feistel(long message, long[] keys)
         {
-            Console.WriteLine("Applying initial transformation to mesage block");
+            Console.WriteLine("Applying initial transformation to message block");
             long l = ApplyPermutation(message, pl.initialPermutation);
+            Console.WriteLine();
+
+            Console.WriteLine("L0: \t\t" + Program.LongToBitString(Program.GetLeftHalf(l)));
+            Console.WriteLine("R0: \t\t" + Program.LongToBitString(Program.GetRightHalf(l)));
+            Console.WriteLine("L1: \t\t" + Program.LongToBitString(Program.GetRightHalf(l)));
             Console.WriteLine();
 
             // 16 rounds of encryption
@@ -53,9 +61,15 @@ namespace DES
                 long left = Program.GetLeftHalf(l);
                 long right = Program.GetRightHalf(l);
                 long newLeft = right;
+
+                Console.WriteLine("Round: " + t);
+                
                 long newRight = left ^ F(right, keys[t]);
 
-                l = newLeft | (newRight >> 32);
+                Console.WriteLine("L" + (t + 2) + " = R" + (t + 1) + " = \t" + Program.LongToBitString(newRight));
+
+                l = newLeft + (newRight >> 32);
+
             }
 
             l = ApplyPermutation(l, pl.finalPermutation);
@@ -76,12 +90,19 @@ namespace DES
         private long F(long righthalf, long key)
         {
             long exRightHalf = ExpandedRightHalf(righthalf);
-
+            Console.WriteLine("E(R): \t\t" + Program.LongToBitString(exRightHalf));
             long xorresult = exRightHalf ^ key;
 
-            long sBoxed = ApplySBoxes(xorresult, true);
-            
-            long pBoxed = ApplyPermutation(sBoxed, pl.PBox, true);
+            Console.WriteLine("K: \t\t" + Program.LongToBitString(key));
+            Console.WriteLine("E(R) XOR K: \t" + Program.LongToBitString(xorresult));
+
+            long sBoxed = ApplySBoxes(xorresult);
+
+            Console.WriteLine("S-box outputs:  " + Program.LongToBitString(sBoxed));
+
+            long pBoxed = ApplyPermutation(sBoxed, pl.PBox);
+
+            Console.WriteLine("f(R, K): \t" + Program.LongToBitString(pBoxed));
 
             return pBoxed;
         }
@@ -126,7 +147,7 @@ namespace DES
         /// <param name="shiftDirection"> The direction to shift the keys in, "left" for encryption and "right" for decryption</param>
         public void GenerateKeys(long[] keys, string shiftDirection, bool debug = false)
         {
-            long key56 = this.ApplyPermutation(fullKey, this.pl.keyPermutation, true);
+            long key56 = this.ApplyPermutation(fullKey, this.pl.keyPermutation);
             
             long shiftedKey = key56, key48;
             for (int i = 0; i < 16; i++)
@@ -257,8 +278,7 @@ namespace DES
 
         public long ExpandedRightHalf(long l)
         {
-            long r = Program.GetRightHalf(l);
-            return ApplyPermutation(r, pl.expansionPermutation, true);
+            return ApplyPermutation(l, pl.expansionPermutation);
         }
 
         public long ApplyPermutation(long l, Permutation p, bool debug = false)

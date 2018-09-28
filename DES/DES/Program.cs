@@ -14,12 +14,12 @@ namespace DES
         {
             //Console.Write("key:\t");
             //string k = Console.ReadLine();
-            string k = "";
+            string k = "0";
             long key = StringToLongList(k)[0];
 
             //Console.Write("message:\t");
             //string s = Console.ReadLine();
-            string s = "";
+            string s = "0";
             //Console.WriteLine();
 
             DES des = new DES(key, StringToLongList(s));
