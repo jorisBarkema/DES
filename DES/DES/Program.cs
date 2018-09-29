@@ -12,30 +12,21 @@ namespace DES
     {
         static void Main(string[] args)
         {
-            //Console.Write("key:\t\t");
-            //string k = Console.ReadLine();
-            //long key = StringToLongList(k)[0];
+            Console.Write("key:\t\t");
+            string k = Console.ReadLine();
 
-            //Console.Write("message:\t");
-            //string s = Console.ReadLine();
+            Console.Write("message:\t");
+            string s = Console.ReadLine();
             
             Console.WriteLine();
+            
+            //string k = "0";
+            //long key = StringToLongList(k)[0];
 
+            //string s = "0";
 
-
-            string k = "0";
-            long key = StringToLongList(k)[0];
-
-            string s = "0";
-
-            DES des = new DES(key, StringToLongList(s));
-
-            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323123172222922231, true)));
-            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323111111111111231, true)));
-            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2312309882222922231, true)));
-            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323098765657922231, true)));
-            //Console.WriteLine(LongToBitString(des.ShiftKeyHalvesRight(2323999999999999231, true)));
-            //Console.ReadLine();
+            DES des = new DES(k, s);
+            
 
             List<long> res = des.Encrypt();
 
@@ -63,10 +54,10 @@ namespace DES
         /// <param name="s">The string to be converted</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns>List of longs from the converted string</returns>
-        static List<long> StringToLongList(string s, bool debug = false)
+        public static List<long> StringToLongList(string s, bool debug = false)
         {
             if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
-            byte[] bytes = Encoding.ASCII.GetBytes(s);
+            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(s);
             //bytes = Convert.FromBase64String(s);
 
             if (debug)
@@ -108,7 +99,7 @@ namespace DES
         /// <param name="i">The index to start</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns> long converted from the byte array</returns>
-        static long ByteArrayToLong(byte[] b, int i, bool debug = false)
+        public static long ByteArrayToLong(byte[] b, int i, bool debug = false)
         {
             if (b.Length - i < 8) throw new Exception();
 
