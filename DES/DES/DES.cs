@@ -86,7 +86,7 @@ namespace DES
             Console.WriteLine("before fin p: \t" + Program.LongToBitString(l));
 
             long r = Program.GetRightHalf(l);
-            l = l >> 32;
+            l = (l >> 32) & uint.MaxValue;
             l |= r;
             Console.WriteLine("r and l shift: \t" + Program.LongToBitString(l));
             l = ApplyPermutation(l, pl.finalPermutation);
@@ -148,7 +148,7 @@ namespace DES
             Console.WriteLine();
             return result;
         }
-
+        /*
         public List<long> Decrypt(List<long> ll)
         {
             List<long> result = new List<long>();
@@ -171,6 +171,37 @@ namespace DES
             Console.WriteLine();
             return result;
         }
+        */
+
+        public List<long> Decrypt(List<long> message)
+        {
+            List<long> result = new List<long>();
+
+            long[] decTestKeys = new long[16];
+
+            for(int i = 0; i < 16; i++)
+            {
+                decTestKeys[15 - i] = encryptionKeys[i];
+            }
+            // for all message blocks
+            for (int i = 0; i < message.Count; i++)
+            {
+                Console.WriteLine("dec block:\t" + Program.LongToBitString(message[i]));
+                long feistelValue = Feistel(message[i], decTestKeys);
+                result.Add(feistelValue);
+            }
+
+            Console.WriteLine();
+            Console.Write("in hex: \t");
+            List<byte> b = Program.LongListToByteList(result);
+            for (int i = 0; i < b.Count; i++)
+            {
+                Console.Write(b[i].ToString("X").PadLeft(2, '0'));
+            }
+            Console.WriteLine();
+            return result;
+        }
+
 
         /// <summary>
         /// Apply the initial permutation to a block of the message
