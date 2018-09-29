@@ -116,6 +116,11 @@ namespace DES
             return pBoxed;
         }
 
+        /// <summary>
+        /// Encrypts the given string in ASCII format using DES encryption algorithm
+        /// </summary>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> Encrypted message in HEX format, HEX was chosen because many characters would be unknown in other text formats such as Unicode and UTF8</returns>
         public List<long> Encrypt(bool debug = false)
         {
             List<long> result = new List<long>();
@@ -152,6 +157,12 @@ namespace DES
             return result;
         }
 
+        /// <summary>
+        /// Decrypts the given encrypted message.
+        /// </summary>
+        /// <param name="message"> The encrypted message to be decrypted</param>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> The decrypted message in ASCII format </returns>
         public List<long> Decrypt(List<long> message, bool debug = false)
         {
             List<long> result = new List<long>();
@@ -259,6 +270,13 @@ namespace DES
             return l;
         }
 
+        /// <summary>
+        /// Applies a given permutation to a long, counting the leftmost bit as bit 1 and the rightmost bit as bit 64
+        /// </summary>
+        /// <param name="l"> The long to be permuted </param>
+        /// <param name="p"></param>
+        /// <param name="debug"></param>
+        /// <returns></returns>
         public long ApplyPermutation(long l, Permutation p, bool debug = false)
         {
             long res = 0;
@@ -279,6 +297,12 @@ namespace DES
             return res;
         }
 
+        /// <summary>
+        /// Applies the S-Boxes to the long
+        /// </summary>
+        /// <param name="l"> The long which the S-Boxes will permute </param>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> The permuted long </returns>
         public long ApplySBoxes(long l, bool debug = false)
         {
             long res = 0;
@@ -306,6 +330,13 @@ namespace DES
             return res;
         }
 
+        /// <summary>
+        /// Applies a given S-Box to a long
+        /// </summary>
+        /// <param name="l"> The 6-bit section of a long which the S-Box should permute the center of </param>
+        /// <param name="s"> The index of the S-Box, note this is 0-based while in literature S-Box indices are usually 1-based </param>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> The permuted section of the long </returns>
         public byte ApplySBox(long l, int s, bool debug = false)
         {
             // look at the rightmost and leftmost bits

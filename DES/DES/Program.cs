@@ -51,9 +51,9 @@ namespace DES
         /// <summary>
         /// Converts a string to a list of longs
         /// </summary>
-        /// <param name="s">The string to be converted</param>
-        /// <param name="debug">Whether or not debug info will be printed on the console</param>
-        /// <returns>List of longs from the converted string</returns>
+        /// <param name="s"> The string to be converted </param>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> List of longs from the converted string </returns>
         public static List<long> StringToLongList(string s, bool debug = false)
         {
             if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
