@@ -48,6 +48,13 @@ namespace DES
             GenerateKeys(encryptionKeys);
         }
 
+        /// <summary>
+        /// A Feistel network as used in the DES encryption algorithm.
+        /// </summary>
+        /// <param name="message"> The message to be encrypted or decrypted </param>
+        /// <param name="keys"> The array of keys to be used in the 16 rounds </param>
+        /// <param name="debug"> Whether or not debug info will be printed on the console </param>
+        /// <returns> The result of the Feistel network </returns>
         private long Feistel(long message, long[] keys, bool debug = false)
         {
             long l = ApplyPermutation(message, pl.initialPermutation);
@@ -221,21 +228,14 @@ namespace DES
                     shiftedKey = ShiftKeyHalvesLeft(shiftedKey, false);
                     if (debug) Console.WriteLine("shifted 56-bit key:\t" + Program.LongToBitString(shiftedKey));
                 }
-                key48 = CompressKey(shiftedKey, false);
+                key48 = ApplyPermutation(shiftedKey, pl.compressionPermutation, false);
                 keys[i] = key48;
 
                 //if (debug) Program.WriteLongAsBits(keys[i], "key number " + i);
             }
             if (debug) Console.WriteLine();
         }
-
-        /// <summary>
-        /// Compresses the 56-bit key to a 48-bit key
-        /// </summary>
-        /// <param name="l"> Key to compress</param>
-        /// <returns> Compressed key</returns>
-        public long CompressKey(long l, bool debug = false) => ApplyPermutation(l, pl.compressionPermutation, debug);
-
+        
         /// <summary>
         /// Shift the 2 halves of the 56-bit key by 1 bit to the left
         /// </summary>

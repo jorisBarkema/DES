@@ -22,14 +22,10 @@ namespace DES
             
             //string k = "0";
             //long key = StringToLongList(k)[0];
-
             //string s = "0";
 
             DES des = new DES(k, s);
-            
-
             List<long> res = des.Encrypt();
-
             List<long> dec = des.Decrypt(res);
 
             Console.ReadLine();
@@ -40,14 +36,7 @@ namespace DES
         public static long GetRightHalf(long l) => (l << 32);
         public static long GetLeftHalf(long l) => (l >> 32) << 32;
         public static long SwapHalves(long l) => (Program.GetLeftHalf(l) >> 32) | Program.GetRightHalf(l);
-
-        static void WriteByteArray(byte[] array, string name = "byte[]")
-        {
-            Console.Write(name + ":\t");
-            for (int i = 0; i < array.Length; i++) Console.Write(array[i] + "\t");
-            Console.WriteLine();
-        }
-
+        
         /// <summary>
         /// Converts a string to a list of longs
         /// </summary>
@@ -59,22 +48,10 @@ namespace DES
             if (debug) Console.WriteLine("Converting string " + s + " to List<long>");
             byte[] bytes = System.Text.Encoding.ASCII.GetBytes(s);
             //bytes = Convert.FromBase64String(s);
-
-            if (debug)
-            {
-                Console.WriteLine("byte form:");
-                WriteByteArray(bytes);
-            }
-
+            
             byte[] paddedBytes = (bytes.Length % 8 == 0) ? new byte[bytes.Length] : new byte[bytes.Length + 8 - (bytes.Length % 8)];
             for (int i = 0; i < bytes.Length; i++) paddedBytes[i] = bytes[i];
-
-            if (debug)
-            {
-                Console.WriteLine("padded byte form:");
-                WriteByteArray(paddedBytes);
-            }
-
+            
             List<long> longs = new List<long>();
 
             for (int i = 0; i <= paddedBytes.Length - 8; i += 8)
@@ -125,13 +102,8 @@ namespace DES
         /// <param name="ll">The list of longs to be converted</param>
         /// <param name="debug">Whether or not debug info will be printed on the console</param>
         /// <returns>The converted byte list</returns>
-        public static List<byte> LongListToByteList(List<long> ll, bool debug = false)
+        public static List<byte> LongListToByteList(List<long> ll)
         {
-            if (debug)
-            {
-                Console.WriteLine("Longs in the list:");
-                foreach (long l in ll) WriteLongAsBits(l);
-            }
             List<byte> res = new List<byte>();
 
             for(int i = 0; i < ll.Count; i++)
@@ -141,11 +113,6 @@ namespace DES
                     byte b = (byte)(ll[i] >> (8 * t));
                     res.Add(b);
                 }
-            }
-
-            if (debug)
-            {
-                WriteByteArray(res.ToArray(), "resulting byte list");
             }
 
             return res;
